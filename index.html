@@ -5,11 +5,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>HSK二级 · 口语考试</title>
 <style>
-  /* ===== 基础重置 ===== */
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
   html { font-size: 16px; }
 
-  /* ===== 字体 ===== */
   body {
     font-family: "DengXian", "等线", "PingFang SC", "Microsoft YaHei", sans-serif;
     background: #faf8f3;
@@ -20,11 +18,12 @@
   .zh { font-family: "SimSun", "STSong", "宋体", "Songti SC", serif; }
   .fr { font-family: "DengXian", "等线", "PingFang SC", "Microsoft YaHei", sans-serif; }
 
-  /* ===== 页面容器 ===== */
   .container {
     max-width: 720px;
     margin: 0 auto;
-    padding: 24px 20px 48px;
+    padding: 24px 20px 80px;
+    position: relative;
+    min-height: 100vh;
   }
 
   /* ===== 顶栏 ===== */
@@ -58,7 +57,10 @@
     padding: 24px 20px;
     margin-bottom: 28px;
     background: #fff;
+    display: none;
   }
+  .part.active { display: block; }
+
   .part-header { margin-bottom: 20px; }
   .part-num {
     font-size: 1.05rem;
@@ -71,7 +73,7 @@
   .part-instruction { font-size: 0.9rem; color: #444; margin-bottom: 6px; }
   .part-instruction.fr { font-size: 0.85rem; color: #666; }
 
-  /* ===== 选择题按钮网格 ===== */
+  /* ===== 按钮网格 ===== */
   .btn-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
@@ -128,7 +130,6 @@
   }
   .content-box .questions .label { font-size: 0.85rem; color: #666; font-weight: normal; }
 
-  /* 第二部分 单题显示 */
   .question-single {
     font-size: 1.05rem;
     margin-bottom: 16px;
@@ -147,7 +148,6 @@
   }
   .btn-back:hover { background: #555; color: #fff; }
 
-  /* 话题提示列表 */
   .prompt-list {
     margin-top: 12px;
     padding-left: 1.2em;
@@ -157,7 +157,6 @@
   .prompt-list li { margin-bottom: 4px; }
   .prompt-list .grammar { color: #8b4513; }
 
-  /* ===== 第二部分选中计数 ===== */
   .pick-counter {
     font-size: 0.85rem;
     color: #888;
@@ -165,6 +164,45 @@
     margin-bottom: 12px;
   }
   .pick-counter.filled { color: #2c2c2c; font-weight: bold; }
+
+  /* ===== 下一步按钮 ===== */
+  .btn-next {
+    font-family: inherit;
+    font-size: 0.95rem;
+    background: none;
+    border: 1.5px solid #2c2c2c;
+    color: #2c2c2c;
+    padding: 10px 24px;
+    cursor: pointer;
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    z-index: 100;
+    transition: background 0.15s, color 0.15s;
+    display: none;
+  }
+  .btn-next.visible { display: inline-block; }
+  .btn-next:hover { background: #2c2c2c; color: #faf8f3; }
+
+  /* ===== 进度点 ===== */
+  .progress-dots {
+    position: fixed;
+    bottom: 32px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 10px;
+    z-index: 90;
+  }
+  .progress-dots .dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    border: 1.5px solid #8b8680;
+    background: transparent;
+    transition: background 0.2s;
+  }
+  .progress-dots .dot.filled { background: #2c2c2c; border-color: #2c2c2c; }
 
   /* ===== 页脚 ===== */
   .footer {
@@ -178,13 +216,15 @@
 
   /* ===== 响应式 ===== */
   @media (max-width: 600px) {
-    .container { padding: 16px 12px 36px; }
+    .container { padding: 16px 12px 80px; }
     .part { padding: 18px 14px; }
     .btn-grid { grid-template-columns: repeat(3, 1fr); }
     .btn-grid.wide { grid-template-columns: repeat(2, 1fr); }
     .btn-choice { font-size: 0.95rem; padding: 14px 6px; }
     .topbar { flex-direction: column; gap: 12px; }
     .btn-reset { align-self: flex-end; }
+    .btn-next { bottom: 20px; right: 16px; padding: 10px 20px; font-size: 0.9rem; }
+    .progress-dots { bottom: 26px; }
   }
 
   @media (max-width: 380px) {
@@ -207,11 +247,11 @@
   </div>
 
   <!-- ==================== 第一部分 ==================== -->
-  <div class="part" id="part1">
+  <div class="part active" id="part1">
     <div class="part-header">
-      <div class="part-num zh">一、读课文并回答问题</div>
-      <div class="part-instruction zh">从下面五篇课文中<strong>选择一篇</strong>，朗读课文并回答问题。课文朗读10分，问题回答5分，共15分。</div>
-      <div class="part-instruction fr">I. Lire le texte et répondre aux questions<br>Choisissez <strong>un texte</strong> parmi les cinq. Lecture 10 points, réponse 5 points. Total : 15 points.</div>
+      <div class="part-num zh">一、读课文并回答问题 <span style="font-weight:normal;font-size:0.85rem;color:#888;">（15分）</span></div>
+      <div class="part-instruction zh">从下面五篇课文中<strong>选择一篇</strong>，朗读课文并回答问题。课文朗读10分，问题回答5分。</div>
+      <div class="part-instruction fr">I. Lire le texte et répondre aux questions<br>Choisissez <strong>un texte</strong> parmi les cinq. Lecture 10 points, réponse 5 points.</div>
     </div>
 
     <div class="btn-grid" id="part1-buttons">
@@ -228,9 +268,9 @@
   <!-- ==================== 第二部分 ==================== -->
   <div class="part" id="part2">
     <div class="part-header">
-      <div class="part-num zh">二、回答问题</div>
-      <div class="part-instruction zh">从下面十个问题中<strong>选择三个</strong>回答。每题10分，共30分。要求至少说1分钟，回答完整。</div>
-      <div class="part-instruction fr">II. Répondre aux questions<br>Choisissez <strong>trois questions</strong> parmi les dix. 10 points par question, total 30 points. Parlez au moins 1 minute, répondez de façon complète.</div>
+      <div class="part-num zh">二、回答问题 <span style="font-weight:normal;font-size:0.85rem;color:#888;">（30分）</span></div>
+      <div class="part-instruction zh">从下面十个问题中<strong>选择三个</strong>回答。每题10分。要求至少说1分钟，回答完整。</div>
+      <div class="part-instruction fr">II. Répondre aux questions<br>Choisissez <strong>trois questions</strong> parmi les dix. 10 points par question. Parlez au moins 1 minute, répondez de façon complète.</div>
       <div class="pick-counter" id="part2-counter">已选：0 / 3</div>
     </div>
 
@@ -253,9 +293,9 @@
   <!-- ==================== 第三部分 ==================== -->
   <div class="part" id="part3">
     <div class="part-header">
-      <div class="part-num zh">三、话题陈述</div>
-      <div class="part-instruction zh">从下面四个话题中<strong>选择一个</strong>进行陈述。准备1分钟，说1分钟。请尽量使用提示中的词和语法。40分。</div>
-      <div class="part-instruction fr">III. Exposé sur un sujet<br>Choisissez <strong>un sujet</strong> parmi les quatre. 1 minute de préparation, 1 minute d&rsquo;expression. Essayez d&rsquo;utiliser les mots et les structures proposés. 40 points.</div>
+      <div class="part-num zh">三、话题陈述 <span style="font-weight:normal;font-size:0.85rem;color:#888;">（40分）</span></div>
+      <div class="part-instruction zh">从下面四个话题中<strong>选择一个</strong>进行陈述。准备1分钟，说1分钟。请尽量使用提示中的词和语法。</div>
+      <div class="part-instruction fr">III. Exposé sur un sujet<br>Choisissez <strong>un sujet</strong> parmi les quatre. 1 minute de préparation, 1 minute d&rsquo;expression. Essayez d&rsquo;utiliser les mots et les structures proposés.</div>
     </div>
 
     <div class="btn-grid" id="part3-buttons">
@@ -269,6 +309,16 @@
   </div>
 
   <div class="footer zh">洛美大学孔子学院 · Institut Confucius de l&rsquo;Université de Lomé</div>
+
+  <!-- ===== 下一步按钮 ===== -->
+  <button class="btn-next" id="btn-next" onclick="nextPart()">下一题 →</button>
+
+  <!-- ===== 进度点 ===== -->
+  <div class="progress-dots">
+    <span class="dot filled" id="dot1"></span>
+    <span class="dot" id="dot2"></span>
+    <span class="dot" id="dot3"></span>
+  </div>
 
 </div><!-- .container -->
 
@@ -384,19 +434,57 @@ const part3Data = {
   }
 };
 
-// ─── 状态 ───
+// ─── 全局状态 ───
+let currentPart = 1;
 let part1Chosen = null;
-let part2Chosen = [];   // 存放已选的题号
+let part2Chosen = [];
 let part3Chosen = null;
-
 const MAX_PART2 = 3;
+
+// ─── 大题切换 ───
+function goToPart(n) {
+  document.querySelectorAll('.part').forEach(p => p.classList.remove('active'));
+  document.getElementById('part' + n).classList.add('active');
+  currentPart = n;
+  updateUI();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function nextPart() {
+  if (currentPart < 3) {
+    goToPart(currentPart + 1);
+  }
+}
+
+function updateUI() {
+  // 进度点
+  for (let i = 1; i <= 3; i++) {
+    const dot = document.getElementById('dot' + i);
+    if (i <= currentPart) dot.classList.add('filled');
+    else dot.classList.remove('filled');
+  }
+
+  // 下一步按钮
+  const btn = document.getElementById('btn-next');
+  if (currentPart < 3) {
+    btn.classList.add('visible');
+    if (currentPart === 3) {
+      btn.textContent = '结束';
+    } else {
+      btn.textContent = '下一题 →';
+    }
+    // 第三部分显示"结束"，但还能点
+    btn.textContent = currentPart === 2 ? '最后一题 →' : '下一题 →';
+  } else {
+    btn.classList.remove('visible');
+  }
+}
 
 // ─── 第一部分：选择课文 ───
 function showPart1(key) {
   if (part1Chosen !== null) return;
   part1Chosen = key;
 
-  // 锁定所有按钮
   const btns = document.querySelectorAll('#part1-buttons .btn-choice');
   btns.forEach(b => {
     if (b.textContent.trim() === key) b.classList.add('chosen');
@@ -420,7 +508,7 @@ function showPart1(key) {
 
 // ─── 第二部分：选择问题 ───
 function showPart2(num) {
-  if (part2Chosen.includes(num)) return; // 已选过
+  if (part2Chosen.includes(num)) return;
   if (part2Chosen.length >= MAX_PART2) return;
 
   part2Chosen.push(num);
@@ -433,7 +521,6 @@ function showPart2(num) {
   box.innerHTML = html;
   box.classList.add('active');
 
-  // 如果选满3个，禁用剩余按钮
   if (part2Chosen.length >= MAX_PART2) {
     const btns = document.querySelectorAll('#part2-buttons .btn-choice');
     btns.forEach(b => {
@@ -489,7 +576,6 @@ function showPart3(num) {
 
 // ─── 重置 ───
 function resetAll() {
-  // 第一部分
   part1Chosen = null;
   document.querySelectorAll('#part1-buttons .btn-choice').forEach(b => {
     b.classList.remove('chosen', 'dimmed');
@@ -498,7 +584,6 @@ function resetAll() {
   b1.classList.remove('active');
   b1.innerHTML = '';
 
-  // 第二部分
   part2Chosen = [];
   document.querySelectorAll('#part2-buttons .btn-choice').forEach(b => {
     b.classList.remove('chosen', 'dimmed');
@@ -510,7 +595,6 @@ function resetAll() {
   counter.textContent = '已选：0 / ' + MAX_PART2;
   counter.classList.remove('filled');
 
-  // 第三部分
   part3Chosen = null;
   document.querySelectorAll('#part3-buttons .btn-choice').forEach(b => {
     b.classList.remove('chosen', 'dimmed');
@@ -519,7 +603,7 @@ function resetAll() {
   b3.classList.remove('active');
   b3.innerHTML = '';
 
-  window.scrollTo({ top: 0, behavior: 'smooth' });
+  goToPart(1);
 }
 
 // ─── 工具函数 ───
