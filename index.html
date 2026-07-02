@@ -1,0 +1,534 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HSK二级 · 口语考试</title>
+<style>
+  /* ===== 基础重置 ===== */
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { font-size: 16px; }
+
+  /* ===== 字体 ===== */
+  body {
+    font-family: "DengXian", "等线", "PingFang SC", "Microsoft YaHei", sans-serif;
+    background: #faf8f3;
+    color: #2c2c2c;
+    line-height: 1.8;
+    min-height: 100vh;
+  }
+  .zh { font-family: "SimSun", "STSong", "宋体", "Songti SC", serif; }
+  .fr { font-family: "DengXian", "等线", "PingFang SC", "Microsoft YaHei", sans-serif; }
+
+  /* ===== 页面容器 ===== */
+  .container {
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 24px 20px 48px;
+  }
+
+  /* ===== 顶栏 ===== */
+  .topbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    border-bottom: 2px solid #2c2c2c;
+    padding-bottom: 16px;
+    margin-bottom: 32px;
+  }
+  .topbar .title-block h1 { font-size: 1.35rem; font-weight: bold; letter-spacing: 0.05em; }
+  .topbar .title-block .sub { font-size: 0.85rem; color: #555; margin-top: 2px; }
+  .btn-reset {
+    font-family: inherit;
+    font-size: 0.85rem;
+    background: none;
+    border: 1.5px solid #2c2c2c;
+    color: #2c2c2c;
+    padding: 6px 18px;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: background 0.15s, color 0.15s;
+    flex-shrink: 0;
+  }
+  .btn-reset:hover { background: #2c2c2c; color: #faf8f3; }
+
+  /* ===== 大题区块 ===== */
+  .part {
+    border: 1.5px solid #c4bfb4;
+    padding: 24px 20px;
+    margin-bottom: 28px;
+    background: #fff;
+  }
+  .part-header { margin-bottom: 20px; }
+  .part-num {
+    font-size: 1.05rem;
+    font-weight: bold;
+    display: inline-block;
+    border-bottom: 2px solid #2c2c2c;
+    padding-bottom: 4px;
+    margin-bottom: 10px;
+  }
+  .part-instruction { font-size: 0.9rem; color: #444; margin-bottom: 6px; }
+  .part-instruction.fr { font-size: 0.85rem; color: #666; }
+
+  /* ===== 选择题按钮网格 ===== */
+  .btn-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+    gap: 10px;
+    margin-top: 16px;
+  }
+  .btn-grid.wide { grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); }
+
+  .btn-choice {
+    font-family: inherit;
+    font-size: 1rem;
+    background: #fff;
+    border: 1.5px solid #8b8680;
+    color: #2c2c2c;
+    padding: 12px 8px;
+    cursor: pointer;
+    text-align: center;
+    transition: background 0.15s, border-color 0.15s, color 0.15s;
+  }
+  .btn-choice:hover:not(.chosen):not(.dimmed) {
+    background: #f0ece5;
+    border-color: #2c2c2c;
+  }
+  .btn-choice.chosen {
+    background: #2c2c2c;
+    color: #faf8f3;
+    border-color: #2c2c2c;
+    cursor: default;
+    pointer-events: none;
+  }
+  .btn-choice.dimmed {
+    opacity: 0.35;
+    cursor: default;
+    pointer-events: none;
+    border-color: #c4bfb4;
+  }
+
+  /* ===== 内容展示区 ===== */
+  .content-box {
+    margin-top: 20px;
+    padding: 20px 18px;
+    border: 1.5px solid #8b8680;
+    background: #fdfcf8;
+    display: none;
+  }
+  .content-box.active { display: block; }
+
+  .content-box .dialogue { margin-bottom: 16px; font-size: 1rem; }
+  .content-box .dialogue p { margin-bottom: 6px; text-indent: 1em; }
+  .content-box .questions {
+    border-top: 1px dashed #c4bfb4;
+    padding-top: 12px;
+    font-weight: bold;
+  }
+  .content-box .questions .label { font-size: 0.85rem; color: #666; font-weight: normal; }
+
+  /* 第二部分 单题显示 */
+  .question-single {
+    font-size: 1.05rem;
+    margin-bottom: 16px;
+  }
+
+  .btn-back {
+    font-family: inherit;
+    font-size: 0.85rem;
+    background: none;
+    border: 1.5px solid #8b8680;
+    color: #555;
+    padding: 6px 16px;
+    cursor: pointer;
+    margin-top: 12px;
+    transition: background 0.15s, color 0.15s;
+  }
+  .btn-back:hover { background: #555; color: #fff; }
+
+  /* 话题提示列表 */
+  .prompt-list {
+    margin-top: 12px;
+    padding-left: 1.2em;
+    font-size: 0.9rem;
+    color: #444;
+  }
+  .prompt-list li { margin-bottom: 4px; }
+  .prompt-list .grammar { color: #8b4513; }
+
+  /* ===== 第二部分选中计数 ===== */
+  .pick-counter {
+    font-size: 0.85rem;
+    color: #888;
+    margin-top: 4px;
+    margin-bottom: 12px;
+  }
+  .pick-counter.filled { color: #2c2c2c; font-weight: bold; }
+
+  /* ===== 页脚 ===== */
+  .footer {
+    text-align: center;
+    font-size: 0.78rem;
+    color: #aaa;
+    margin-top: 40px;
+    padding-top: 16px;
+    border-top: 1px solid #e0dcd3;
+  }
+
+  /* ===== 响应式 ===== */
+  @media (max-width: 600px) {
+    .container { padding: 16px 12px 36px; }
+    .part { padding: 18px 14px; }
+    .btn-grid { grid-template-columns: repeat(3, 1fr); }
+    .btn-grid.wide { grid-template-columns: repeat(2, 1fr); }
+    .btn-choice { font-size: 0.95rem; padding: 14px 6px; }
+    .topbar { flex-direction: column; gap: 12px; }
+    .btn-reset { align-self: flex-end; }
+  }
+
+  @media (max-width: 380px) {
+    .btn-grid { grid-template-columns: repeat(2, 1fr); }
+    .btn-grid.wide { grid-template-columns: repeat(2, 1fr); }
+  }
+</style>
+</head>
+<body>
+
+<div class="container">
+
+  <!-- ===== 顶栏 ===== -->
+  <div class="topbar">
+    <div class="title-block">
+      <h1 class="zh">洛美大学孔子学院</h1>
+      <div class="sub zh">2025－2026学年第二学期 · 水平班二级口语考试</div>
+    </div>
+    <button class="btn-reset" onclick="resetAll()" title="从头开始">⟳ 重置</button>
+  </div>
+
+  <!-- ==================== 第一部分 ==================== -->
+  <div class="part" id="part1">
+    <div class="part-header">
+      <div class="part-num zh">一、读课文并回答问题</div>
+      <div class="part-instruction zh">从下面五篇课文中<strong>选择一篇</strong>，朗读课文并回答问题。课文朗读10分，问题回答5分，共15分。</div>
+      <div class="part-instruction fr">I. Lire le texte et répondre aux questions<br>Choisissez <strong>un texte</strong> parmi les cinq. Lecture 10 points, réponse 5 points. Total : 15 points.</div>
+    </div>
+
+    <div class="btn-grid" id="part1-buttons">
+      <button class="btn-choice" onclick="showPart1('A')">A</button>
+      <button class="btn-choice" onclick="showPart1('B')">B</button>
+      <button class="btn-choice" onclick="showPart1('C')">C</button>
+      <button class="btn-choice" onclick="showPart1('D')">D</button>
+      <button class="btn-choice" onclick="showPart1('E')">E</button>
+    </div>
+
+    <div class="content-box" id="part1-content"></div>
+  </div>
+
+  <!-- ==================== 第二部分 ==================== -->
+  <div class="part" id="part2">
+    <div class="part-header">
+      <div class="part-num zh">二、回答问题</div>
+      <div class="part-instruction zh">从下面十个问题中<strong>选择三个</strong>回答。每题10分，共30分。要求至少说1分钟，回答完整。</div>
+      <div class="part-instruction fr">II. Répondre aux questions<br>Choisissez <strong>trois questions</strong> parmi les dix. 10 points par question, total 30 points. Parlez au moins 1 minute, répondez de façon complète.</div>
+      <div class="pick-counter" id="part2-counter">已选：0 / 3</div>
+    </div>
+
+    <div class="btn-grid wide" id="part2-buttons">
+      <button class="btn-choice" onclick="showPart2(1)">1</button>
+      <button class="btn-choice" onclick="showPart2(2)">2</button>
+      <button class="btn-choice" onclick="showPart2(3)">3</button>
+      <button class="btn-choice" onclick="showPart2(4)">4</button>
+      <button class="btn-choice" onclick="showPart2(5)">5</button>
+      <button class="btn-choice" onclick="showPart2(6)">6</button>
+      <button class="btn-choice" onclick="showPart2(7)">7</button>
+      <button class="btn-choice" onclick="showPart2(8)">8</button>
+      <button class="btn-choice" onclick="showPart2(9)">9</button>
+      <button class="btn-choice" onclick="showPart2(10)">10</button>
+    </div>
+
+    <div class="content-box" id="part2-content"></div>
+  </div>
+
+  <!-- ==================== 第三部分 ==================== -->
+  <div class="part" id="part3">
+    <div class="part-header">
+      <div class="part-num zh">三、话题陈述</div>
+      <div class="part-instruction zh">从下面四个话题中<strong>选择一个</strong>进行陈述。准备1分钟，说1分钟。请尽量使用提示中的词和语法。40分。</div>
+      <div class="part-instruction fr">III. Exposé sur un sujet<br>Choisissez <strong>un sujet</strong> parmi les quatre. 1 minute de préparation, 1 minute d&rsquo;expression. Essayez d&rsquo;utiliser les mots et les structures proposés. 40 points.</div>
+    </div>
+
+    <div class="btn-grid" id="part3-buttons">
+      <button class="btn-choice" onclick="showPart3(1)">话题 1</button>
+      <button class="btn-choice" onclick="showPart3(2)">话题 2</button>
+      <button class="btn-choice" onclick="showPart3(3)">话题 3</button>
+      <button class="btn-choice" onclick="showPart3(4)">话题 4</button>
+    </div>
+
+    <div class="content-box" id="part3-content"></div>
+  </div>
+
+  <div class="footer zh">洛美大学孔子学院 · Institut Confucius de l&rsquo;Université de Lomé</div>
+
+</div><!-- .container -->
+
+
+<!-- ==================== 数据 & 脚本 ==================== -->
+<script>
+// ─── 第一部分数据 ───
+const part1Data = {
+  A: {
+    dialogue: [
+      "A：听说你上个月去北京旅游了，好玩吗？",
+      "B：很好玩。北京比洛美大很多，人也很好。",
+      "A：你是和谁一起去的？",
+      "B：是和我的好朋友一起去的。虽然有点儿累，但是很有意思。",
+      "A：你们都去了什么地方？",
+      "B：去了很多地方。最好玩儿的是长城，我在那儿拍了很多照片。"
+    ],
+    question: "B觉得北京怎么样？他觉得最好的地方是哪里？"
+  },
+  B: {
+    dialogue: [
+      "A：你看见王老师了吗？",
+      "B：她不在这儿，我看见她往教室走了。",
+      "A：她手里拿着什么？",
+      "B：拿着很多书，可能要去上课。",
+      "A：那她什么时候有时间？",
+      "B：十一点半下课。你不是有她的电话吗？给她打个电话吧。"
+    ],
+    question: "王老师现在可能在哪儿？做什么？B让A做什么？"
+  },
+  C: {
+    dialogue: [
+      "A：明天是我妻子的生日，我想送她一件衣服。",
+      "B：这件红色的怎么样？你妻子穿红色的衣服很好看。",
+      "A：不错，就是有点儿贵。那件白的便宜一点，但是没这件好看。",
+      "B：还是买这件红的吧，她过生日，贵一点也可以。",
+      "A：对，就买这件吧。多少钱？",
+      "B：两百块，比那件白的贵五十块。"
+    ],
+    question: "A要给谁买东西？他最后买了哪件？为什么？"
+  },
+  D: {
+    dialogue: [
+      "A：你身体怎么样？上一次见你的时候你还在生病呢。",
+      "B：好多了，谢谢。我现在每天都去跑步。",
+      "A：是吗？你以前不喜欢运动啊。",
+      "B：是啊。上次生病，医生说我运动太少。现在我每天早上六点起床去跑步。",
+      "A：你每天跑步已经多长时间了？",
+      "B：三个星期了。虽然有时候很累，但是身体比以前好多了。"
+    ],
+    question: "B为什么开始每天跑步？他的身体怎么样了？"
+  },
+  E: {
+    dialogue: [
+      "A：我找不到我的手机了，你看见了吗？",
+      "B：没有。是不是在桌子上？",
+      "A：找过一次了，桌子上没有。",
+      "B：十分钟前，你不是在打电话吗？看看你的包里。",
+      "A：对！打完电话放在包里了。找到了！",
+      "B：以后拿好吧，不要经常找手机。"
+    ],
+    question: "A的手机是在哪里找到的？B对A说了什么？"
+  }
+};
+
+// ─── 第二部分数据 ───
+const part2Data = [
+  "你的汉语老师怎么样？请介绍一下。",
+  "不上课的时候，你准备做什么？为什么？",
+  "猫、狗，你喜欢哪一个？为什么？",
+  "请介绍一件让你觉得快乐的事情。",
+  "你累的时候会做什么？",
+  "下雨的时候，你喜欢做什么？",
+  "昨天你做什么了？",
+  "你觉得什么运动最好？为什么？",
+  "你去过中国吗？想去中国旅游吗？",
+  "你想做老师吗？为什么？"
+];
+
+// ─── 第三部分数据 ───
+const part3Data = {
+  1: {
+    title: "话题1：我的一天（Ma journée）",
+    prompts: [
+      "每……都……（例如：我每天都8点起床）",
+      "因为……所以……",
+      "V+得+Adj（例如：起得很早、吃得很好）"
+    ]
+  },
+  2: {
+    title: "话题2：我去过的一个地方（Un endroit que j'ai visité）",
+    prompts: [
+      "过（例如：去过、吃过）",
+      "是……的（例如：是去年去的、是和朋友一起去的）",
+      "比（例如：比洛美热、比这里大）"
+    ]
+  },
+  3: {
+    title: "话题3：我的爱好（Mes loisirs）",
+    prompts: [
+      "会",
+      "虽然……但是……",
+      "从……开始（例如：从小开始、从去年开始）"
+    ]
+  },
+  4: {
+    title: "话题4：我的家人或朋友（Ma famille ou mon ami）",
+    prompts: [
+      "比（例如：比我高、比我大）",
+      "对……好（例如：对我很好）",
+      "帮（例如：帮我学汉语）"
+    ]
+  }
+};
+
+// ─── 状态 ───
+let part1Chosen = null;
+let part2Chosen = [];   // 存放已选的题号
+let part3Chosen = null;
+
+const MAX_PART2 = 3;
+
+// ─── 第一部分：选择课文 ───
+function showPart1(key) {
+  if (part1Chosen !== null) return;
+  part1Chosen = key;
+
+  // 锁定所有按钮
+  const btns = document.querySelectorAll('#part1-buttons .btn-choice');
+  btns.forEach(b => {
+    if (b.textContent.trim() === key) b.classList.add('chosen');
+    else b.classList.add('dimmed');
+  });
+
+  const data = part1Data[key];
+  const box = document.getElementById('part1-content');
+  let html = '<div class="dialogue">';
+  data.dialogue.forEach(line => {
+    html += '<p class="zh">' + escapeHtml(line) + '</p>';
+  });
+  html += '</div>';
+  html += '<div class="questions">';
+  html += '<span class="label zh">问题 / Question：</span><br>';
+  html += '<span class="zh">' + escapeHtml(data.question) + '</span>';
+  html += '</div>';
+  box.innerHTML = html;
+  box.classList.add('active');
+}
+
+// ─── 第二部分：选择问题 ───
+function showPart2(num) {
+  if (part2Chosen.includes(num)) return; // 已选过
+  if (part2Chosen.length >= MAX_PART2) return;
+
+  part2Chosen.push(num);
+  updatePart2Counter();
+  dimPart2Button(num);
+
+  const box = document.getElementById('part2-content');
+  let html = '<div class="question-single zh">' + escapeHtml(part2Data[num - 1]) + '</div>';
+  html += '<button class="btn-back" onclick="backPart2()">← 返回列表</button>';
+  box.innerHTML = html;
+  box.classList.add('active');
+
+  // 如果选满3个，禁用剩余按钮
+  if (part2Chosen.length >= MAX_PART2) {
+    const btns = document.querySelectorAll('#part2-buttons .btn-choice');
+    btns.forEach(b => {
+      const n = parseInt(b.textContent.trim());
+      if (!part2Chosen.includes(n)) b.classList.add('dimmed');
+    });
+  }
+}
+
+function backPart2() {
+  const box = document.getElementById('part2-content');
+  box.classList.remove('active');
+  box.innerHTML = '';
+}
+
+function dimPart2Button(num) {
+  const btns = document.querySelectorAll('#part2-buttons .btn-choice');
+  btns.forEach(b => {
+    if (parseInt(b.textContent.trim()) === num) b.classList.add('chosen');
+  });
+}
+
+function updatePart2Counter() {
+  const counter = document.getElementById('part2-counter');
+  counter.textContent = '已选：' + part2Chosen.length + ' / ' + MAX_PART2;
+  if (part2Chosen.length >= MAX_PART2) counter.classList.add('filled');
+}
+
+// ─── 第三部分：选择话题 ───
+function showPart3(num) {
+  if (part3Chosen !== null) return;
+  part3Chosen = num;
+
+  const btns = document.querySelectorAll('#part3-buttons .btn-choice');
+  btns.forEach(b => {
+    const label = b.textContent.trim();
+    const n = parseInt(label.replace('话题 ', ''));
+    if (n === num) b.classList.add('chosen');
+    else b.classList.add('dimmed');
+  });
+
+  const data = part3Data[num];
+  const box = document.getElementById('part3-content');
+  let html = '<div class="question-single zh" style="font-weight:bold;">' + escapeHtml(data.title) + '</div>';
+  html += '<ul class="prompt-list">';
+  data.prompts.forEach(p => {
+    html += '<li class="zh grammar">' + escapeHtml(p) + '</li>';
+  });
+  html += '</ul>';
+  box.innerHTML = html;
+  box.classList.add('active');
+}
+
+// ─── 重置 ───
+function resetAll() {
+  // 第一部分
+  part1Chosen = null;
+  document.querySelectorAll('#part1-buttons .btn-choice').forEach(b => {
+    b.classList.remove('chosen', 'dimmed');
+  });
+  const b1 = document.getElementById('part1-content');
+  b1.classList.remove('active');
+  b1.innerHTML = '';
+
+  // 第二部分
+  part2Chosen = [];
+  document.querySelectorAll('#part2-buttons .btn-choice').forEach(b => {
+    b.classList.remove('chosen', 'dimmed');
+  });
+  const b2 = document.getElementById('part2-content');
+  b2.classList.remove('active');
+  b2.innerHTML = '';
+  const counter = document.getElementById('part2-counter');
+  counter.textContent = '已选：0 / ' + MAX_PART2;
+  counter.classList.remove('filled');
+
+  // 第三部分
+  part3Chosen = null;
+  document.querySelectorAll('#part3-buttons .btn-choice').forEach(b => {
+    b.classList.remove('chosen', 'dimmed');
+  });
+  const b3 = document.getElementById('part3-content');
+  b3.classList.remove('active');
+  b3.innerHTML = '';
+
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// ─── 工具函数 ───
+function escapeHtml(str) {
+  const div = document.createElement('div');
+  div.textContent = str;
+  return div.innerHTML;
+}
+</script>
+
+</body>
+</html>
