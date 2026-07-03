@@ -178,10 +178,11 @@
     bottom: 24px;
     right: 24px;
     z-index: 100;
-    transition: background 0.15s, color 0.15s;
-    display: none;
+    transition: opacity 0.2s, background 0.15s, color 0.15s;
+    opacity: 0;
+    pointer-events: none;
   }
-  .btn-next.visible { display: inline-block; }
+  .btn-next.visible { opacity: 1; pointer-events: auto; }
   .btn-next:hover { background: #2c2c2c; color: #faf8f3; }
 
   /* ===== 进度点 ===== */
@@ -468,12 +469,6 @@ function updateUI() {
   const btn = document.getElementById('btn-next');
   if (currentPart < 3) {
     btn.classList.add('visible');
-    if (currentPart === 3) {
-      btn.textContent = '结束';
-    } else {
-      btn.textContent = '下一题 →';
-    }
-    // 第三部分显示"结束"，但还能点
     btn.textContent = currentPart === 2 ? '最后一题 →' : '下一题 →';
   } else {
     btn.classList.remove('visible');
@@ -612,6 +607,9 @@ function escapeHtml(str) {
   div.textContent = str;
   return div.innerHTML;
 }
+
+// ─── 页面初始化 ───
+updateUI();
 </script>
 
 </body>
