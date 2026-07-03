@@ -155,6 +155,32 @@
     border-color: #c4bfb4;
   }
 
+  /* ===== 开始页 ===== */
+  .start-page {
+    display: none;
+    text-align: center;
+    padding: 60px 20px;
+    border: 1.5px solid #c4bfb4;
+    background: #fff;
+  }
+  .start-page.active { display: block; }
+  .start-page .welcome { font-size: 1.6rem; margin-bottom: 24px; letter-spacing: 0.08em; }
+  .start-page .hint { font-size: 1rem; color: #555; margin-bottom: 8px; }
+  .start-page .hint.fr { font-size: 0.95rem; color: #777; }
+  .btn-start {
+    font-family: inherit;
+    font-size: 1.15rem;
+    background: none;
+    border: 2px solid #2c2c2c;
+    color: #2c2c2c;
+    padding: 12px 48px;
+    cursor: pointer;
+    margin-top: 32px;
+    letter-spacing: 0.1em;
+    transition: background 0.15s, color 0.15s;
+  }
+  .btn-start:hover { background: #2c2c2c; color: #faf8f3; }
+
   /* ===== 内容展示区 ===== */
   .content-box {
     margin-top: 20px;
@@ -301,12 +327,20 @@
     </div>
   </div>
 
+  <!-- ==================== 开始页 ==================== -->
+  <div class="start-page active" id="start-page">
+    <div class="welcome zh">欢迎参加HSK二级口语考试</div>
+    <div class="hint zh">请确认字体大小是否合适。</div>
+    <div class="hint fr">Veuillez vérifier que la taille de la police vous convient.</div>
+    <button class="btn-start" onclick="goToPart(1)">开始考试</button>
+  </div>
+
   <!-- ==================== 第一部分 ==================== -->
-  <div class="part active" id="part1">
+  <div class="part" id="part1">
     <div class="part-header">
       <div class="part-num zh">一、读课文并回答问题 <span style="font-weight:normal;font-size:0.85rem;color:#888;">（30分）</span></div>
-      <div class="part-instruction zh">从下面五篇课文中<strong>选择两篇</strong>，朗读课文并回答问题。每篇课文朗读10分，问题回答5分。</div>
-      <div class="part-instruction fr">I. Lire le texte et répondre aux questions<br>Choisissez <strong>deux textes</strong> parmi les cinq. Lecture 10 points, réponse 5 points par texte.</div>
+      <div class="part-instruction zh">从下面五篇课文中<strong>选择两篇</strong>，朗读课文并根据课文内容回答问题。每篇课文朗读10分，问题回答5分。</div>
+      <div class="part-instruction fr">I. Lire le texte et répondre aux questions selon le contenu<br>Choisissez <strong>deux textes</strong> parmi les cinq. Lecture 10 points, réponse 5 points par texte.</div>
       <div class="pick-counter" id="part1-counter">已选：0 / 2</div>
     </div>
 
@@ -491,7 +525,7 @@ const part3Data = {
 };
 
 // ─── 全局状态 ───
-let currentPart = 1;
+let currentPart = 0;  // 0 = 开始页
 let part1Chosen = [];
 let part2Chosen = [];
 let part3Chosen = null;
@@ -501,7 +535,12 @@ const MAX_PART2 = 3;
 // ─── 大题切换 ───
 function goToPart(n) {
   document.querySelectorAll('.part').forEach(p => p.classList.remove('active'));
-  document.getElementById('part' + n).classList.add('active');
+  document.getElementById('start-page').classList.remove('active');
+  if (n === 0) {
+    document.getElementById('start-page').classList.add('active');
+  } else {
+    document.getElementById('part' + n).classList.add('active');
+  }
   currentPart = n;
   updateUI();
   window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -517,13 +556,13 @@ function updateUI() {
   // 进度点
   for (let i = 1; i <= 3; i++) {
     const dot = document.getElementById('dot' + i);
-    if (i <= currentPart) dot.classList.add('filled');
+    if (currentPart > 0 && i <= currentPart) dot.classList.add('filled');
     else dot.classList.remove('filled');
   }
 
   // 下一步按钮
   const btn = document.getElementById('btn-next');
-  if (currentPart < 3) {
+  if (currentPart > 0 && currentPart < 3) {
     btn.classList.add('visible');
     btn.textContent = currentPart === 2 ? '最后一题 →' : '下一题 →';
   } else {
@@ -682,7 +721,7 @@ function resetAll() {
   b3.classList.remove('active');
   b3.innerHTML = '';
 
-  goToPart(1);
+  goToPart(0);
 }
 
 // ─── 字体大小调整 ───
