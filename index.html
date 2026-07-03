@@ -250,9 +250,10 @@
   <!-- ==================== 第一部分 ==================== -->
   <div class="part active" id="part1">
     <div class="part-header">
-      <div class="part-num zh">一、读课文并回答问题 <span style="font-weight:normal;font-size:0.85rem;color:#888;">（15分）</span></div>
-      <div class="part-instruction zh">从下面五篇课文中<strong>选择一篇</strong>，朗读课文并回答问题。课文朗读10分，问题回答5分。</div>
-      <div class="part-instruction fr">I. Lire le texte et répondre aux questions<br>Choisissez <strong>un texte</strong> parmi les cinq. Lecture 10 points, réponse 5 points.</div>
+      <div class="part-num zh">一、读课文并回答问题 <span style="font-weight:normal;font-size:0.85rem;color:#888;">（30分）</span></div>
+      <div class="part-instruction zh">从下面五篇课文中<strong>选择两篇</strong>，朗读课文并回答问题。每篇课文朗读10分，问题回答5分。</div>
+      <div class="part-instruction fr">I. Lire le texte et répondre aux questions<br>Choisissez <strong>deux textes</strong> parmi les cinq. Lecture 10 points, réponse 5 points par texte.</div>
+      <div class="pick-counter" id="part1-counter">已选：0 / 2</div>
     </div>
 
     <div class="btn-grid" id="part1-buttons">
@@ -437,9 +438,10 @@ const part3Data = {
 
 // ─── 全局状态 ───
 let currentPart = 1;
-let part1Chosen = null;
+let part1Chosen = [];
 let part2Chosen = [];
 let part3Chosen = null;
+const MAX_PART1 = 2;
 const MAX_PART2 = 3;
 
 // ─── 大题切换 ───
@@ -477,14 +479,12 @@ function updateUI() {
 
 // ─── 第一部分：选择课文 ───
 function showPart1(key) {
-  if (part1Chosen !== null) return;
-  part1Chosen = key;
+  if (part1Chosen.includes(key)) return;
+  if (part1Chosen.length >= MAX_PART1) return;
 
-  const btns = document.querySelectorAll('#part1-buttons .btn-choice');
-  btns.forEach(b => {
-    if (b.textContent.trim() === key) b.classList.add('chosen');
-    else b.classList.add('dimmed');
-  });
+  part1Chosen.push(key);
+  updatePart1Counter();
+  dimPart1Button(key);
 
   const data = part1Data[key];
   const box = document.getElementById('part1-content');
@@ -497,8 +497,35 @@ function showPart1(key) {
   html += '<span class="label zh">问题 / Question：</span><br>';
   html += '<span class="zh">' + escapeHtml(data.question) + '</span>';
   html += '</div>';
+  html += '<button class="btn-back" onclick="backPart1()">← 返回列表</button>';
   box.innerHTML = html;
   box.classList.add('active');
+
+  if (part1Chosen.length >= MAX_PART1) {
+    const btns = document.querySelectorAll('#part1-buttons .btn-choice');
+    btns.forEach(b => {
+      if (!part1Chosen.includes(b.textContent.trim())) b.classList.add('dimmed');
+    });
+  }
+}
+
+function backPart1() {
+  const box = document.getElementById('part1-content');
+  box.classList.remove('active');
+  box.innerHTML = '';
+}
+
+function dimPart1Button(key) {
+  const btns = document.querySelectorAll('#part1-buttons .btn-choice');
+  btns.forEach(b => {
+    if (b.textContent.trim() === key) b.classList.add('chosen');
+  });
+}
+
+function updatePart1Counter() {
+  const counter = document.getElementById('part1-counter');
+  counter.textContent = '已选：' + part1Chosen.length + ' / ' + MAX_PART1;
+  if (part1Chosen.length >= MAX_PART1) counter.classList.add('filled');
 }
 
 // ─── 第二部分：选择问题 ───
@@ -571,13 +598,16 @@ function showPart3(num) {
 
 // ─── 重置 ───
 function resetAll() {
-  part1Chosen = null;
+  part1Chosen = [];
   document.querySelectorAll('#part1-buttons .btn-choice').forEach(b => {
     b.classList.remove('chosen', 'dimmed');
   });
   const b1 = document.getElementById('part1-content');
   b1.classList.remove('active');
   b1.innerHTML = '';
+  const counter1 = document.getElementById('part1-counter');
+  counter1.textContent = '已选：0 / ' + MAX_PART1;
+  counter1.classList.remove('filled');
 
   part2Chosen = [];
   document.querySelectorAll('#part2-buttons .btn-choice').forEach(b => {
