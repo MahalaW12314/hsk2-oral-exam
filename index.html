@@ -37,6 +37,17 @@
   }
   .topbar .title-block h1 { font-size: 1.35rem; font-weight: bold; letter-spacing: 0.05em; }
   .topbar .title-block .sub { font-size: 0.85rem; color: #555; margin-top: 2px; }
+  /* ===== 右上角固定控件 ===== */
+  .topright {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 110;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 8px;
+  }
   .btn-reset {
     font-family: inherit;
     font-size: 0.85rem;
@@ -47,9 +58,42 @@
     cursor: pointer;
     white-space: nowrap;
     transition: background 0.15s, color 0.15s;
-    flex-shrink: 0;
   }
   .btn-reset:hover { background: #2c2c2c; color: #faf8f3; }
+
+  /* ===== 字体大小控件 ===== */
+  .font-ctrl {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: #faf8f3;
+    border: 1.5px solid #c4bfb4;
+    padding: 4px 8px;
+  }
+  .font-ctrl .btn-font {
+    font-family: inherit;
+    font-size: 0.9rem;
+    background: none;
+    border: 1.5px solid #8b8680;
+    color: #2c2c2c;
+    width: 28px;
+    height: 28px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    line-height: 1;
+    transition: background 0.15s;
+  }
+  .font-ctrl .btn-font:hover { background: #e8e4db; }
+  .font-ctrl .font-icon {
+    font-size: 0.95rem;
+    color: #666;
+    min-width: 18px;
+    text-align: center;
+    user-select: none;
+  }
 
   /* ===== 大题区块 ===== */
   .part {
@@ -222,8 +266,9 @@
     .btn-grid { grid-template-columns: repeat(3, 1fr); }
     .btn-grid.wide { grid-template-columns: repeat(2, 1fr); }
     .btn-choice { font-size: 0.95rem; padding: 14px 6px; }
-    .topbar { flex-direction: column; gap: 12px; }
-    .btn-reset { align-self: flex-end; }
+    .topright { top: 12px; right: 12px; gap: 6px; }
+    .btn-reset { font-size: 0.8rem; padding: 5px 14px; }
+    .font-ctrl .btn-font { width: 26px; height: 26px; font-size: 0.85rem; }
     .btn-next { bottom: 20px; right: 16px; padding: 10px 20px; font-size: 0.9rem; }
     .progress-dots { bottom: 26px; }
   }
@@ -244,7 +289,16 @@
       <h1 class="zh">洛美大学孔子学院</h1>
       <div class="sub zh">2025－2026学年第二学期 · 水平班二级口语考试</div>
     </div>
+  </div>
+
+  <!-- ===== 右上角固定控件 ===== -->
+  <div class="topright">
     <button class="btn-reset" onclick="resetAll()" title="从头开始">⟳ 重置</button>
+    <div class="font-ctrl">
+      <button class="btn-font" onclick="changeFontSize(-1)" title="缩小字体">−</button>
+      <span class="font-icon">A</span>
+      <button class="btn-font" onclick="changeFontSize(1)" title="放大字体">+</button>
+    </div>
   </div>
 
   <!-- ==================== 第一部分 ==================== -->
@@ -629,6 +683,19 @@ function resetAll() {
   b3.innerHTML = '';
 
   goToPart(1);
+
+  // 恢复默认字号
+  fontSizeLevel = 0;
+  document.documentElement.style.fontSize = FONT_SIZES[0];
+}
+
+// ─── 字体大小调整 ───
+let fontSizeLevel = 0;
+const FONT_SIZES = ['14px', '16px', '18px', '20px', '22px'];
+
+function changeFontSize(delta) {
+  fontSizeLevel = Math.max(0, Math.min(FONT_SIZES.length - 1, fontSizeLevel + delta));
+  document.documentElement.style.fontSize = FONT_SIZES[fontSizeLevel];
 }
 
 // ─── 工具函数 ───
