@@ -19,7 +19,8 @@
   .fr { font-family: "DengXian", "等线", "PingFang SC", "Microsoft YaHei", sans-serif; }
 
   .container {
-    max-width: 900px;
+    width: 80%;
+    max-width: 1200px;
     margin: 0 auto;
     padding: 24px 20px 80px;
     position: relative;
@@ -726,7 +727,7 @@ function resetAll() {
 
 // ─── 字体大小调整 ───
 let fontSizeLevel = 0;
-const FONT_SIZES = ['14px', '16px', '18px', '20px', '22px', '24px', '26px'];
+const FONT_SIZES = ['14px', '16px', '18px', '20px', '22px', '24px', '26px', '28px', '30px', '32px'];
 
 function changeFontSize(delta) {
   fontSizeLevel = Math.max(0, Math.min(FONT_SIZES.length - 1, fontSizeLevel + delta));
